@@ -18,6 +18,8 @@ Bangle.on('accel',function(a) {
     Math.round(a.y*100),
     Math.round(a.z*100)
     ];
+    
+   Bluetooth.println(d.join(","));
 })
 `;
 
