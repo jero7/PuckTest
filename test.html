@@ -11,6 +11,82 @@
 <script>
 // Code to upload to Bangle.js
 var BANGLE_CODE = `
+// Two variables to update
+var boolean = false;
+var number = 50;
+
+// notalar
+var doo =261.63;
+var re =293.66;
+var mi =329.63;
+var fa =369.99;
+var sol =392.00;
+var la =440.00;
+var si =493.90;
+
+//süreler
+var sixteen=500;
+var eight=sixteen*2;
+var four=eight*2;
+
+//starwars çal
+function starwars(){
+  Bangle.beep(sixteen,doo);
+  Bangle.beep(sixteen,re);
+  Bangle.beep(eight,mi);
+  Bangle.beep(eight,fa);
+  Bangle.beep(four,sol);
+  Bangle.beep(four,la);
+  Bangle.beep(four,si);
+  Bangle.beep(four,doo*2);
+}
+
+//başkaşarkı çal
+function baska(){
+  Bangle.beep(sixteen,doo);
+  Bangle.beep(sixteen,re);
+  Bangle.beep(eight,mi);
+  Bangle.beep(eight,fa);
+  Bangle.beep(four,sol);
+  Bangle.beep(four,la);
+  Bangle.beep(four,si);
+  Bangle.beep(four,doo*2);
+}
+
+// First menu
+var mainmenu = {
+  "" : {
+    "title" : "-- Ceren's Menu --"
+  },
+  "Beep" : function() { Bangle.beep(); },
+  "Buzz" : function() { Bangle.buzz(); },
+  "Music" : function() { E.showMenu(music); },
+  "A Number" : {
+    value : number,
+    min:0,max:100,step:10,
+    onchange : v => { number=v; }
+  },
+  "Exit" : function() { E.showMenu(); },
+};
+
+// Submenu1
+var music = {
+  "" : {
+    "title" : "-- Music --"
+  },
+  "Star Wars" : function() { starwars(); }, // do nothing
+  "Baska" : function() { baska(); }, // do nothing
+  "< Back" : function() { E.showMenu(mainmenu); },
+};
+
+
+// Actually display the menu
+setWatch(function() {
+  console.log("Pressed");
+  E.showMenu(mainmenu);
+},BTN2, {edge:"rising", debounce:50, repeat:true});
+
+
 Bangle.on('accel',function(a) {
   var d = [
     "A",
