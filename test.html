@@ -1,121 +1,35 @@
 <html>
- <head>
-   <title>Bangle.js Accelerometer streaming in 3D</title>
- </head>
- <body style="margin:0px">
-<script src="https://www.puck-js.com/puck.js"></script>
-<button id="btnConnect" style="position:absolute;left:5px;top:5px;z-index:1000">Connect</button>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r99/three.min.js"></script>
-<script>
-// Code to upload to Bangle.js
-var BANGLE_CODE =
-function draw() {
-  // work out how to display the current time
-  var d = new Date();
-  var h = d.getHours(), m = d.getMinutes();
-  var time = h + ":" + ("0"+m).substr(-2);
+  <head>
+    <link rel="stylesheet" href="../../css/spectre.min.css">
+  </head>
+  <body>
 
-  // Reset the state of the graphics library
-  g.reset();
-  // Clear the area where we want to draw the time
-  g.clearRect(50,50,100,120);
-  // draw the current time
-  g.drawString(time, 50, 50);
-}
+    <p>Some text: <input type="text" id="mytext" class="form-input" value="http://espruino.com"></p>
+    <p>Click <button id="upload" class="btn btn-primary">Upload</button></p>
 
-// Clear the screen once, at startup
-g.clear();
-// draw immediately at first
-draw();
-var secondInterval = setInterval(draw, 1000);
-    `
-Bangle.on('accel',function(a) {
-  var d = [
-    "A",
-    Math.round(a.x*100),
-    Math.round(a.y*100),
-    Math.round(a.z*100)
-    ];
-  Bluetooth.println(d.join(","));
-})
+    <script src="../../core/lib/customize.js"></script>
+
+    <script>
+      // When the 'upload' button is clicked...
+      document.getElementById("upload").addEventListener("click", function() {
+        // get the text to add
+        var text = document.getElementById("mytext").value;
+        // build the app's text using a templated String
+        var app = `
+var txt = ${JSON.stringify(text)};
+g.clear(1);
+g.setFontAlign(0,0);
+g.setFont("6x8");
+g.drawString(txt,120,120);
 `;
-var accel = new THREE.Vector3( 0, 0, 1 );
+        // send finished app (in addition to contents of app.json)
+        sendCustomizedApp({
+          storage:[
+            {name:"myapp.app.js", url:"app.js", content:app},
+          ]
+        });
+      });
 
-// When we click the connect button...
-var connection;
-document.getElementById("btnConnect").addEventListener("click", function() {
-  // disconnect if connected already
-  if (connection) {
-    connection.close();
-    connection = undefined;
-  }
-  // Connect
-  Puck.connect(function(c) {
-    if (!c) {
-      alert("Couldn't connect!");
-      return;
-    }
-    connection = c;
-    // Handle the data we get back, and call 'onLine'
-    // whenever we get a line
-    var buf = "";
-    connection.on("data", function(d) {
-      buf += d;
-      var l = buf.split("\n");
-      buf = l.pop();
-      l.forEach(onLine);
-    });
-    // First, reset the Bangle
-    connection.write("reset();\n", function() {
-      // Wait for it to reset itself
-      setTimeout(function() {
-        // Now upload our code to it
-        connection.write("\x03\x10if(1){"+BANGLE_CODE+"}\n",
-          function() { console.log("Ready..."); });
-      }, 1500);
-    });
-  });
-});
-
-// When we get a line of data, check it and if it's
-// from the accelerometer, update it
-function onLine(line) {
-  console.log("RECEIVED:"+line);
-  var d = line.split(",");
-  if (d.length==4 && d[0]=="A") {
-    // we have an accelerometer reading
-    accel.x = parseInt(d[1])/100;
-    accel.y = parseInt(d[2])/100;
-    accel.z = parseInt(d[3])/100;
-    render();
-  }
-}
-// WebGL boilerplate
-var scene, camera, renderer, cube;
-var WIDTH  = window.innerWidth;
-var HEIGHT = window.innerHeight;
-function init() {
-    scene = new THREE.Scene();
-
-    camera = new THREE.PerspectiveCamera(70, WIDTH / HEIGHT, 1, 10);
-    camera.position.set(0, 3.5, 5);
-    camera.lookAt(scene.position);
-
-    cube = new THREE.Mesh(new THREE.CubeGeometry(2, 2, 2), new THREE.MeshNormalMaterial());
-    scene.add(cube);
-
-    renderer = new THREE.WebGLRenderer({ antialias: true });
-    renderer.setSize(WIDTH, HEIGHT);
-
-    document.body.appendChild(renderer.domElement);
-}
-function render() {
-    cube.lookAt(accel);
-    renderer.render(scene, camera);
-}
-
-init();
-render();
-</script>
- </body>
+    </script>
+  </body>
 </html>
