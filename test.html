@@ -25,19 +25,17 @@ Bangle.on('accel',function(a) {
 // When we click the connect button...
 var connection;
 document.getElementById("btnConnect").addEventListener("click", function() {
-  if (!connection) {
-      alert("Couldn't connect!");
-      return;
-  } 
- // disconnect if connected already
+  // disconnect if connected already
   if (connection) {
     connection.close();
     connection = undefined;
-   alert("Disconnected!");
-   return;
   }
   // Connect
   Puck.connect(function(c) {
+    if (!c) {
+      alert("Couldn't connect!");
+      return;
+    }
     connection = c;
     // Handle the data we get back, and call 'onLine'
     // whenever we get a line
