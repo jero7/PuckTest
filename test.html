@@ -29,6 +29,7 @@ document.getElementById("btnConnect").addEventListener("click", function() {
   if (connection) {
     connection.close();
     connection = undefined;
+   alert("Disconnected!");
   }
   // Connect
   Puck.connect(function(c) {
